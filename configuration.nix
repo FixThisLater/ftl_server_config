@@ -1,9 +1,4 @@
-{
-  modulesPath,
-  lib,
-  pkgs,
-  ...
-} @ args:
+{modulesPath, pkgs, ...}:
 {
 
   imports = [
@@ -82,12 +77,14 @@
         };
         # Function for reverse-proxies that just need port specified
         port = port: ssl // {
-          locations."/".proxyPass = "http://127.0.0.1:${toString(port)}/";
+          locations."/".proxyPass = "http://127.0.0.1:${toString port}/";
         };
       in {
         "fixthislater.com" = path "/srv/www/fixthislater.com";
       };
 
   };
+
+
 
 }

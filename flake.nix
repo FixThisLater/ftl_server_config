@@ -8,7 +8,7 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = inputs@{ self, nixpkgs, flake-utils, ... }:
+  outputs = inputs@{ nixpkgs, flake-utils, ... }:
     {
       nixosConfigurations.ftl = nixpkgs.lib.nixosSystem {
         modules = [
