@@ -3,19 +3,19 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    flake-utils.url = "github:numtide/flake-utils";
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = inputs@{ nixpkgs, flake-utils, ... }:
+  outputs = { nixpkgs, flake-utils, disko, ... }:
     {
       nixosConfigurations.ftl = nixpkgs.lib.nixosSystem {
         modules = [
           ./configuration.nix
-          inputs.disko.nixosModules.disko
+          disko.nixosModules.disko
         ];
       };
     }
