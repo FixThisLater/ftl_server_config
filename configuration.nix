@@ -1,6 +1,8 @@
-{modulesPath, pkgs, ...}:
+{ modulesPath, pkgs, config, ... }:
+let
+  domain = "fixthislater.com";
+in
 {
-
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
@@ -80,11 +82,21 @@
           locations."/".proxyPass = "http://127.0.0.1:${toString port}/";
         };
       in {
-        "fixthislater.com" = path "/srv/www/fixthislater.com";
+        ${domain} = path "/srv/www/fixthislater.com";
+        ${config.mailserver.fqdn} = ssl;
       };
-
   };
 
-
-
+  mailserver = {
+    enable = true;
+    stateVersion = 3;
+    fqdn = "mail.${domain}";
+    domains = [ domain ];
+    certificateScheme = "acme";
+    loginAccounts = {
+      "admin@fixthislater.com" = {
+        hashedPassword = "$y$j9T$qpFfZbzlc8n5v8SP7DKT2/$7moM8Qb/M1ZW1ZUsLSX/3g1J42VgtbvIUYKwgTd9H90";
+      };
+    };
+  };
 }

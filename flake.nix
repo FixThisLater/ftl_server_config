@@ -8,14 +8,19 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    mailserver = {
+      url = "gitlab:simple-nixos-mailserver/nixos-mailserver/nixos-25.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { nixpkgs, flake-utils, disko, ... }:
+  outputs = { nixpkgs, flake-utils, disko, mailserver, ... }:
     {
       nixosConfigurations.ftl = nixpkgs.lib.nixosSystem {
         modules = [
           ./configuration.nix
           disko.nixosModules.disko
+          mailserver.nixosModule
         ];
       };
     }
