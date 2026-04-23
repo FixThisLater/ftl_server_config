@@ -25,7 +25,7 @@
       pkgs = import nixpkgs { inherit system; };
       server_ip = "46.225.136.43";
     in {
-      apps = {
+      apps = rec {
         create = {
           type = "app";
           program = toString (pkgs.writers.writeBash "ftl_server_config_create" ''
@@ -34,7 +34,6 @@
               github:nix-community/nixos-anywhere -- \
                 --flake . \
                 --target-host root@${server_ip} \
-                --build-on remote
                 --build-on remote \
                 --use-substitutes
           '');
@@ -46,9 +45,9 @@
               --flake .#ftl \
               --build-host root@${server_ip} \
               --target-host root@${server_ip}
-              --build-on-remote
           '');
         };
+        default = update;
       };
     });
 }
