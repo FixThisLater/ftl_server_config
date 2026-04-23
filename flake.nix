@@ -35,6 +35,8 @@
                 --flake . \
                 --target-host root@${server_ip} \
                 --build-on remote
+                --build-on remote \
+                --use-substitutes
           '');
         };
         update = {
@@ -42,7 +44,9 @@
           program = toString (pkgs.writers.writeBash "ftl_server_config_update" ''
             nixos-rebuild switch \
               --flake .#ftl \
+              --build-host root@${server_ip} \
               --target-host root@${server_ip}
+              --build-on-remote
           '');
         };
       };
