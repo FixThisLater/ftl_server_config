@@ -1,4 +1,6 @@
 {
+  description = "Config of the primary Fix This Later server";
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     disko = {
