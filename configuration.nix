@@ -94,14 +94,23 @@ in
     fqdn = "mail.${domain}";
     domains = [ domain ];
     certificateScheme = "acme";
-    loginAccounts = {
-      "admin@fixthislater.com" = {
-        hashedPassword = "$y$j9T$qpFfZbzlc8n5v8SP7DKT2/$7moM8Qb/M1ZW1ZUsLSX/3g1J42VgtbvIUYKwgTd9H90";
+    ldap = {
+      enable = true;
+      uris = [ "ldap:///" ];
+      bind = {
+        dn = "cn=admin,dc=fixthislater,dc=com";
+        passwordFile = "/run/secrets/ldap_admin_pw";
       };
-      "dave_walsh@fixthislater.com" = {
-        hashedPassword = "$y$j9T$qpFfZbzlc8n5v8SP7DKT2/$7moM8Qb/M1ZW1ZUsLSX/3g1J42VgtbvIUYKwgTd9H90";
-      };
+      searchBase = "ou=users,dc=fixthislater,dc=com";
     };
+#     loginAccounts = {
+#       "admin@fixthislater.com" = {
+#         hashedPassword = "$y$j9T$qpFfZbzlc8n5v8SP7DKT2/$7moM8Qb/M1ZW1ZUsLSX/3g1J42VgtbvIUYKwgTd9H90";
+#       };
+#       "dave_walsh@fixthislater.com" = {
+#         hashedPassword = "$y$j9T$qpFfZbzlc8n5v8SP7DKT2/$7moM8Qb/M1ZW1ZUsLSX/3g1J42VgtbvIUYKwgTd9H90";
+#       };
+#     };
   };
 
   # PostgreSQL
