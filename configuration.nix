@@ -1,4 +1,4 @@
-{ modulesPath, pkgs, config, ... }:
+{ modulesPath, lib, pkgs, config, ... }:
 let
   domain = "fixthislater.com";
 in
@@ -72,17 +72,18 @@ in
           forceSSL = true;
           enableACME = true;
         };
-        # Function for web-hosts that just need path specified
-        path = path: ssl // {
-          root = path;
-          locations."/".tryFiles = "$uri /index.html =404";
-        };
-        # Function for reverse-proxies that just need port specified
-        port = port: ssl // {
-          locations."/".proxyPass = "http://127.0.0.1:${toString port}/";
-        };
       in {
-        ${domain} = path "/srv/www/fixthislater.com";
+        ${domain} = ssl // {
+          locations = {
+            "/auth/" = {
+              proxyPass = "http://127.0.0.1:${toString config.services.keycloak.settings.http-port}/auth/";
+            };
+            "/" = {
+              root = "/srv/www/fixthislater.com";
+              tryFiles = "$uri /index.html =404";
+            };
+          };
+        };
         ${config.mailserver.fqdn} = ssl;
       };
   };
@@ -97,6 +98,77 @@ in
       "admin@fixthislater.com" = {
         hashedPassword = "$y$j9T$qpFfZbzlc8n5v8SP7DKT2/$7moM8Qb/M1ZW1ZUsLSX/3g1J42VgtbvIUYKwgTd9H90";
       };
+      "dave_walsh@fixthislater.com" = {
+        hashedPassword = "$y$j9T$qpFfZbzlc8n5v8SP7DKT2/$7moM8Qb/M1ZW1ZUsLSX/3g1J42VgtbvIUYKwgTd9H90";
+      };
     };
   };
+
+  # PostgreSQL
+  services.postgresql = {
+    enable = true;
+    ensureDatabases = [ "keycloak" ];
+    ensureUsers = [
+      {
+        name = "keycloak";
+        ensureDBOwnership = true;
+        ensureClauses.login = true;
+      }
+    ];
+    authentication = lib.mkOverride 49 ''
+      # TYPE  DATABASE        USER            ADDRESS                 METHOD
+      local   postgres        postgres                                trust
+      local   keycloak        keycloak                                trust
+    '';
+  };
+
+  # Keycloak
+  services.keycloak = {
+    enable = true;
+    initialAdminPassword = "changeme";
+    settings = {
+      hostname = "fixthislater.com";
+      http-enabled = true;
+      http-port = 8080;
+      http-relative-path = "/auth";
+      proxy-headers = "xforwarded";
+    };
+    database.host = "/run/postgresql";
+    plugins = with pkgs.keycloak.plugins; [
+      junixsocket-common
+      junixsocket-native-common
+    ];
+  };
+
+  services.openldap = {
+    enable = true;
+    urlList = [ "ldap:///" ];
+    settings.attrs.olcLogLevel = "conns config";
+    settings.children = {
+      "cn=schema".includes = [
+        "${pkgs.openldap}/etc/schema/core.ldif"
+        "${pkgs.openldap}/etc/schema/cosine.ldif"
+        "${pkgs.openldap}/etc/schema/inetorgperson.ldif"
+      ];
+      "olcDatabase={1}mdb".attrs = {
+        objectClass = [ "olcDatabaseConfig" "olcMdbConfig" ];
+        olcDatabase = "{1}mdb";
+        olcDbDirectory = "/var/lib/openldap/data";
+        olcSuffix = "dc=fixthislater,dc=com";
+        olcRootDN = "cn=admin,dc=fixthislater,dc=com";
+        olcRootPW.path = "/run/secrets/ldap_admin_pw";
+        olcAccess = [
+          /* custom access rules for userPassword attributes */
+          ''{0}to attrs=userPassword
+              by self write
+              by anonymous auth
+              by * none''
+          /* allow read on anything else */
+          ''{1}to *
+              by * read''
+        ];
+      };
+    };
+  };
+
 }
