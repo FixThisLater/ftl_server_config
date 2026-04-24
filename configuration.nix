@@ -103,14 +103,6 @@ in
       };
       searchBase = "ou=users,dc=fixthislater,dc=com";
     };
-#     loginAccounts = {
-#       "admin@fixthislater.com" = {
-#         hashedPassword = "$y$j9T$qpFfZbzlc8n5v8SP7DKT2/$7moM8Qb/M1ZW1ZUsLSX/3g1J42VgtbvIUYKwgTd9H90";
-#       };
-#       "dave_walsh@fixthislater.com" = {
-#         hashedPassword = "$y$j9T$qpFfZbzlc8n5v8SP7DKT2/$7moM8Qb/M1ZW1ZUsLSX/3g1J42VgtbvIUYKwgTd9H90";
-#       };
-#     };
   };
 
   # PostgreSQL
