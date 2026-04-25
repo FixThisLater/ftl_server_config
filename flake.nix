@@ -17,18 +17,9 @@
   outputs = { nixpkgs, flake-utils, disko, mailserver, ... }:
     {
       nixosConfigurations.ftl = nixpkgs.lib.nixosSystem {
-        modules = [
+        modules = nixpkgs.lib.filesystem.listFilesRecursive ./modules ++ [
           disko.nixosModules.disko
           mailserver.nixosModule
-          ./general.nix
-          ./users.nix
-          ./system-packages.nix
-          ./disk-config.nix
-          ./postgresql.nix
-          ./keycloak.nix
-          ./mailserver.nix
-          ./openldap.nix
-          ./nginx.nix
         ];
       };
     }
