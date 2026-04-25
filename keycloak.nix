@@ -3,10 +3,9 @@
   enable = true;
   initialAdminPassword = "changeme";
   settings = {
-    hostname = "fixthislater.com";
+    hostname = "auth.fixthislater.com";
     http-enabled = true;
     http-port = 8080;
-    http-relative-path = "/auth";
     proxy-headers = "xforwarded";
   };
   database.host = "/run/postgresql";

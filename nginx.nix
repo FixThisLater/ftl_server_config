@@ -18,15 +18,13 @@
       };
     in {
       "fixthislater.com" = ssl // {
-        locations = {
-          "/auth/" = {
-            proxyPass = "http://127.0.0.1:${toString config.services.keycloak.settings.http-port}/auth/";
-          };
-          "/" = {
+        locations."/" = {
             root = "/srv/www/fixthislater.com";
             tryFiles = "$uri /index.html =404";
-          };
         };
+      };
+      "auth.fixthislater.com" = ssl // {
+        locations."/".proxyPass = "http://127.0.0.1:${toString config.services.keycloak.settings.http-port}";
       };
       ${config.mailserver.fqdn} = ssl;
     };
