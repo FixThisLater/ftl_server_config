@@ -18,13 +18,23 @@
     {
       nixosConfigurations.ftl = nixpkgs.lib.nixosSystem {
         modules = [
-          ./configuration.nix
           disko.nixosModules.disko
           mailserver.nixosModule
+          ./general.nix
+          ./users.nix
+          ./system-packages.nix
+          ./disk-config.nix
+          ./postgresql.nix
+          ./keycloak.nix
+          ./mailserver.nix
+          ./openldap.nix
+          ./nginx.nix
         ];
       };
     }
     //
+    # Define apps for building & rebuilding the server's OS using the repo
+    # config files
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = import nixpkgs { inherit system; };
