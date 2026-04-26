@@ -1,4 +1,4 @@
-{ modulesPath, ... }:
+{ modulesPath, hostname, domain, ... }:
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -8,6 +8,15 @@
   system.stateVersion = "24.05";
 
   nixpkgs.hostPlatform = "x86_64-linux";
+  
+  networking = {
+    hostName = hostname;
+    domain = domain;
+    firewall.allowedTCPPorts = [
+      80 # HTTP
+      443 # HTTPS
+    ];
+  };
 
   boot.loader.grub = {
     efiSupport = true;
@@ -21,14 +30,9 @@
     "flakes" 
   ];
 
-  networking.firewall.allowedTCPPorts = [
-    80 # HTTP
-    443 # HTTPS
-  ];
-
   security.acme = {
     acceptTerms = true;
-    defaults.email = "admin@fixthislater.com";
+    defaults.email = "admin@${hostname}";
   };
 
 }

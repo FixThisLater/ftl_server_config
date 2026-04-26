@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, fqdn, ... }:
 { services.nginx = {
 
   enable = true;
@@ -17,13 +17,13 @@
         enableACME = true;
       };
     in {
-      "fixthislater.com" = ssl // {
+      ${fqdn} = ssl // {
         locations."/" = {
-            root = "/srv/www/fixthislater.com";
+            root = "/srv/www/${fqdn}";
             tryFiles = "$uri /index.html =404";
         };
       };
-      "auth.fixthislater.com" = ssl // {
+      "auth.${fqdn}" = ssl // {
         locations."/".proxyPass = "http://127.0.0.1:${toString config.services.keycloak.settings.http-port}";
       };
       ${config.mailserver.fqdn} = ssl;

@@ -1,9 +1,9 @@
-{ pkgs, ... }:
+{ pkgs, fqdn, ... }:
 { services.keycloak = {
   enable = true;
   initialAdminPassword = "changeme";
   settings = {
-    hostname = "auth.fixthislater.com";
+    hostname = "auth.${fqdn}";
     http-enabled = true;
     http-port = 8080;
     proxy-headers = "xforwarded";

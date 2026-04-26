@@ -15,8 +15,19 @@
   };
 
   outputs = { nixpkgs, flake-utils, disko, mailserver, ... }:
+    let
+      # These arguments, and only these, will vary by system; the rest of the
+      # code is portable, and refer to these args where applicable
+      args = rec {
+        hostname = "fixthislater";
+        domain = "com";
+        fqdn = "${hostname}.${domain}";
+        root_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN6iC2Erg+IjdAGib4lzJ34HLICZ2NZqug1Wx8LSIt6Z admin@${fqdn}";
+      };
+    in
     {
-      nixosConfigurations.ftl = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.fixthislater = nixpkgs.lib.nixosSystem {
+        specialArgs = args;
         modules = nixpkgs.lib.filesystem.listFilesRecursive ./modules ++ [
           disko.nixosModules.disko
           mailserver.nixosModule
@@ -29,28 +40,28 @@
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = import nixpkgs { inherit system; };
-      server_ip = "46.225.136.43";
+      fqdn = args.fqdn;
     in {
       apps = rec {
         create = {
           type = "app";
-          program = toString (pkgs.writers.writeBash "ftl_server_config_create" ''
+          program = toString (pkgs.writers.writeBash "server_config_create" ''
             nix run \
               --extra-experimental-features 'nix-command flakes' \
               github:nix-community/nixos-anywhere -- \
                 --flake . \
-                --target-host root@${server_ip} \
+                --target-host root@${fqdn} \
                 --build-on remote \
                 --use-substitutes
           '');
         };
         update = {
           type = "app";
-          program = toString (pkgs.writers.writeBash "ftl_server_config_update" ''
+          program = toString (pkgs.writers.writeBash "server_config_update" ''
             nixos-rebuild switch \
-              --flake .#ftl \
-              --build-host root@${server_ip} \
-              --target-host root@${server_ip}
+              --flake . \
+              --build-host root@${fqdn} \
+              --target-host root@${fqdn}
           '');
         };
         default = update;
