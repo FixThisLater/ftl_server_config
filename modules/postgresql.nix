@@ -11,7 +11,7 @@
   ];
   authentication = lib.mkOverride 49 ''
     # TYPE  DATABASE        USER            ADDRESS                 METHOD
-    local   postgres        postgres                                trust
+    local   all             postgres                                trust
     local   keycloak        keycloak                                trust
   '';
 }; }
