@@ -12,6 +12,6 @@
       dn = "cn=admin,dc=${hostname},dc=${domain}";
       passwordFile = "/run/secrets/ldap_admin_pw";
     };
-    searchBase = "cn=admin,dc=${hostname},dc=${domain}";
+    searchBase = "ou=users,dc=${hostname},dc=${domain}";
   };
 }; }
