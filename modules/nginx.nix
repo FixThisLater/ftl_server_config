@@ -16,6 +16,9 @@
         forceSSL = true;
         enableACME = true;
       };
+      port = port: ssl // {
+        locations."/".proxyPass = "http://127.0.0.1:${toString port}";
+      };
     in {
       ${fqdn} = ssl // {
         locations."/" = {
@@ -23,9 +26,7 @@
             tryFiles = "$uri /index.html =404";
         };
       };
-      "auth.${fqdn}" = ssl // {
-        locations."/".proxyPass = "http://127.0.0.1:${toString config.services.keycloak.settings.http-port}";
-      };
       ${config.mailserver.fqdn} = ssl;
+      ${config.services.keycloak.settings.hostname} = port config.services.keycloak.settings.http-port;
     };
 }; }
