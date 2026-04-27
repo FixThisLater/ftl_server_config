@@ -1,4 +1,4 @@
-{ modulesPath, hostname, domain, ... }:
+{ modulesPath, hostname, domain, fqdn, ... }:
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -32,7 +32,7 @@
 
   security.acme = {
     acceptTerms = true;
-    defaults.email = "admin@${hostname}";
+    defaults.email = "admin@${fqdn}";
   };
 
 }
