@@ -1,5 +1,8 @@
 {
-  description = "Config of the primary Fix This Later server";
+  description = ''
+    Config of the Fix This Later monolith server. All the distinctive 
+    parameters are defined in "args.nix".
+  '';
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
@@ -15,16 +18,7 @@
   };
 
   outputs = { nixpkgs, flake-utils, disko, mailserver, ... }:
-    let
-      # These arguments, and only these, will vary by system; the rest of the
-      # code is portable, and refer to these args where applicable
-      args = rec {
-        hostname = "fixthislater";
-        domain = "com";
-        fqdn = "${hostname}.${domain}";
-        root_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN6iC2Erg+IjdAGib4lzJ34HLICZ2NZqug1Wx8LSIt6Z admin@${fqdn}";
-      };
-    in
+    let args = import ./args.nix; in
     {
       nixosConfigurations.fixthislater = nixpkgs.lib.nixosSystem {
         specialArgs = args;
@@ -40,24 +34,19 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
+        utils = import ./utils.nix { inherit pkgs; };
         fqdn = args.fqdn;
-        # Wraps "replaceVars" just so it returns an executable bash script
-        replaceInBash = src: replacements:
-          let
-            replacedCode = builtins.readFile (pkgs.replaceVars src replacements);
-          in
-          toString (pkgs.writers.writeBash (builtins.baseNameOf src) replacedCode);
       in {
         apps = rec {
           create = {
             meta = { description = "Establish the server after VM creation."; };
             type = "app";
-            program = replaceInBash ./programs/create.sh { inherit fqdn; };
+            program = utils.replaceInBash ./programs/create.sh { inherit fqdn; };
           };
           update = {
             meta = { description = "Update the server config."; };
             type = "app";
-            program = replaceInBash ./programs/update.sh { inherit fqdn; };
+            program = utils.replaceInBash ./programs/update.sh { inherit fqdn; };
           };
           default = update;
         };
