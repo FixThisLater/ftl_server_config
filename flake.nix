@@ -38,33 +38,29 @@
     # Define apps for building & rebuilding the server's OS using the repo
     # config files
     flake-utils.lib.eachDefaultSystem (system:
-    let
-      pkgs = import nixpkgs { inherit system; };
-      fqdn = args.fqdn;
-    in {
-      apps = rec {
-        create = {
-          type = "app";
-          program = toString (pkgs.writers.writeBash "server_config_create" ''
-            nix run \
-              --extra-experimental-features 'nix-command flakes' \
-              github:nix-community/nixos-anywhere -- \
-                --flake . \
-                --target-host root@${fqdn} \
-                --build-on remote \
-                --use-substitutes
-          '');
+      let
+        pkgs = import nixpkgs { inherit system; };
+        fqdn = args.fqdn;
+        # Wraps "replaceVars" just so it returns an executable bash script
+        replaceInBash = src: replacements:
+          let
+            replacedCode = builtins.readFile (pkgs.replaceVars src replacements);
+          in
+          toString (pkgs.writers.writeBash (builtins.baseNameOf src) replacedCode);
+      in {
+        apps = rec {
+          create = {
+            meta = { description = "Establish the server after VM creation."; };
+            type = "app";
+            program = replaceInBash ./programs/create.sh { inherit fqdn; };
+          };
+          update = {
+            meta = { description = "Update the server config."; };
+            type = "app";
+            program = replaceInBash ./programs/update.sh { inherit fqdn; };
+          };
+          default = update;
         };
-        update = {
-          type = "app";
-          program = toString (pkgs.writers.writeBash "server_config_update" ''
-            nixos-rebuild switch \
-              --flake . \
-              --build-host root@${fqdn} \
-              --target-host root@${fqdn}
-          '');
-        };
-        default = update;
-      };
-    });
+      }
+    );
 }
