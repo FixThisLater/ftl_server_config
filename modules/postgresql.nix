@@ -9,9 +9,5 @@
       ensureClauses.login = true;
     }
   ];
-  authentication = lib.mkOverride 49 ''
-    # TYPE  DATABASE        USER            ADDRESS                 METHOD
-    local   all             postgres                                trust
-    local   keycloak        keycloak                                trust
-  '';
+  authentication = lib.mkOverride 49 (builtins.readFile ../configs/pg_hba.conf);
 }; }
