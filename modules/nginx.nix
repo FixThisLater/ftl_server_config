@@ -28,7 +28,7 @@
       };
       ${config.mailserver.fqdn} = {};
       ${config.services.keycloak.settings.hostname} = rproxy config.services.keycloak.settings.http-port;
-      ${config.services.forgejo.settings.server.DOMAIN} = 
+      ${config.services.forgejo.settings.server.DOMAIN} =
         rproxy config.services.forgejo.settings.server.HTTP_PORT // {
           extraConfig = ''
             client_max_body_size 512M;

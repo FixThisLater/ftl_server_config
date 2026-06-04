@@ -1,10 +1,15 @@
 { lib, ... }:
 { services.postgresql = {
   enable = true;
-  ensureDatabases = [ "keycloak" ];
+  ensureDatabases = [ "keycloak" "forgejo" ];
   ensureUsers = [
     {
       name = "keycloak";
+      ensureDBOwnership = true;
+      ensureClauses.login = true;
+    }
+    {
+      name = "forgejo";
       ensureDBOwnership = true;
       ensureClauses.login = true;
     }
