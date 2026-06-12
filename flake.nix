@@ -7,6 +7,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     flake-utils.url = "github:numtide/flake-utils";
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -17,12 +21,17 @@
     };
   };
 
-  outputs = { nixpkgs, flake-utils, disko, mailserver, ... }:
-    let args = import ./args.nix; in
+  outputs = { nixpkgs, flake-utils, sops-nix, disko, mailserver, ... }:
+    let args = nixpkgs.lib.mergeAttrsList [
+      (import ./args.nix)
+      {helpers = import ./helpers.nix { pkgs = nixpkgs; }; }
+    ];
+    in
     {
       nixosConfigurations.fixthislater = nixpkgs.lib.nixosSystem {
         specialArgs = args;
         modules = nixpkgs.lib.filesystem.listFilesRecursive ./modules ++ [
+          sops-nix.nixosModules.sops
           disko.nixosModules.disko
           mailserver.nixosModule
         ];
@@ -34,19 +43,19 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
-        utils = import ./utils.nix { inherit pkgs; };
-        fqdn = args.fqdn;
+        fqdn = "${args.hostName}.${args.domain}";
+        helpers = import ./helpers.nix { inherit pkgs; };
       in {
         apps = rec {
           create = {
             meta = { description = "Establish the server after VM creation."; };
             type = "app";
-            program = utils.replaceInBash ./programs/create.sh { inherit fqdn; };
+            program = helpers.replaceInBash ./programs/create.sh { inherit fqdn; };
           };
           update = {
             meta = { description = "Update the server config."; };
             type = "app";
-            program = utils.replaceInBash ./programs/update.sh { inherit fqdn; };
+            program = helpers.replaceInBash ./programs/update.sh { inherit fqdn; };
           };
           default = update;
         };

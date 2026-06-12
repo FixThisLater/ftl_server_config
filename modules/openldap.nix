@@ -1,4 +1,4 @@
-{ pkgs, hostname, domain, ... }:
+{ pkgs, hostName, domain, ... }:
 { services.openldap = {
   enable = true;
   urlList = [ "ldap:///" ];
@@ -13,8 +13,8 @@
       objectClass = [ "olcDatabaseConfig" "olcMdbConfig" ];
       olcDatabase = "{1}mdb";
       olcDbDirectory = "/var/lib/openldap/data";
-      olcSuffix = "dc=${hostname},dc=${domain}";
-      olcRootDN = "cn=admin,dc=${hostname},dc=${domain}";
+      olcSuffix = "dc=${hostName},dc=${domain}";
+      olcRootDN = "cn=admin,dc=${hostName},dc=${domain}";
       olcRootPW.path = "/run/secrets/ldap_admin_pw";
       olcAccess = [
         /* custom access rules for userPassword attributes */

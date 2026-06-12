@@ -1,0 +1,4 @@
+matrix_authentication_service:
+  enabled: true
+  endpoint: http://localhost:8081/
+  secret_path: /run/secrets/mas/secret-synapse

@@ -1,8 +1,6 @@
-{ root_key, ... }:
+{ rootKey, ... }:
 { users.users = {
-  root.openssh.authorizedKeys.keys = [
-    root_key
-  ];
+  root.openssh.authorizedKeys.keys = [ rootKey ];
 
   # Add nginx user to acme group so it can read certs
   nginx.extraGroups = [ "acme" ];

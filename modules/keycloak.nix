@@ -1,9 +1,9 @@
-{ pkgs, fqdn, ... }:
+{ config, pkgs, ... }:
 { services.keycloak = {
   enable = true;
   initialAdminPassword = "changeme";
   settings = {
-    hostname = "auth.${fqdn}";
+    hostname = "auth.${config.networking.fqdn}";
     http-enabled = true;
     http-port = 8080;
     proxy-headers = "xforwarded";

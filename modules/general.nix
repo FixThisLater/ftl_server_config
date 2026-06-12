@@ -1,4 +1,4 @@
-{ modulesPath, hostname, domain, fqdn, ... }:
+{ config, modulesPath, hostName, domain, ... }:
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -10,7 +10,7 @@
   nixpkgs.hostPlatform = "x86_64-linux";
   
   networking = {
-    hostName = hostname;
+    hostName = hostName;
     domain = domain;
     firewall.allowedTCPPorts = [
       80 # HTTP
@@ -32,7 +32,19 @@
 
   security.acme = {
     acceptTerms = true;
-    defaults.email = "admin@${fqdn}";
+    defaults.email = "admin@${config.networking.fqdn}";
+  };
+
+  services.wiki-js = {
+    enable = true;
+    settings = {
+      db = {
+        type = "postgres";
+        host = "/run/postgresql";
+        user = "wiki";
+      };
+      port = 3001;
+    };
   };
 
 }

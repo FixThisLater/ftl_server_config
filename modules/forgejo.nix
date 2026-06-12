@@ -1,4 +1,4 @@
-{ config, fqdn, ... }:
+{ config, ... }:
 let
   fjDomain = config.services.forgejo.settings.server.DOMAIN;
 in
@@ -15,7 +15,7 @@ in
       APP_NAME = "# FIX THIS LATER";
     };
     server = {
-      DOMAIN = "git.${fqdn}";
+      DOMAIN = "git.${config.networking.fqdn}";
       ROOT_URL = "https://${fjDomain}";
     };
 #     mailer = {
