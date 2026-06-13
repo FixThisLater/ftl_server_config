@@ -1,5 +1,15 @@
-{ pkgs, lib, config, helpers, ... }:
-let fqdn = config.networking.fqdn; in
+{ pkgs, lib, config, ... }:
+let 
+  fqdn = config.networking.fqdn; 
+  # Makes standard ".well-known" file contents with the input as the response
+  # payload.
+  # Source: https://nixos.org/manual/nixos/stable/index.html#module-services-matrix-synapse
+  mkWellKnown = data: ''
+    default_type application/json;
+    add_header Access-Control-Allow-Origin *;
+    return 200 '${data}';
+  '';
+in
 { services.nginx = {
 
   enable = true;
@@ -14,12 +24,12 @@ let fqdn = config.networking.fqdn; in
 
   virtualHosts = 
     let 
-      rProxy = helpers.rProxy;
+      rProxy = port: { proxyPass = "http://127.0.0.1:${toString port}"; };
       defaults = {
         forceSSL = true;
         enableACME = true;
       };
-      favicon = {"= /favicon.ico".alias = "/srv/www/${fqdn}/favicon.ico"; };
+      favicon = {"~ /favicon*.ico".alias = "/srv/www/${fqdn}/favicon.ico"; };
       matrixClientConfig = {
         "m.homeserver".base_url =
           "https://${fqdn}";
@@ -31,7 +41,7 @@ let fqdn = config.networking.fqdn; in
         "~ ^/_matrix/client/(.*)/(login|logout|refresh)" = rProxy 8081;
         "~ ^(/_matrix|/_synapse/client|/_synapse/mas)" = rProxy 8008;
         "= /.well-known/matrix/client" = {
-          extraConfig = helpers.mkWellKnown (
+          extraConfig = mkWellKnown (
             builtins.toJSON matrixClientConfig
           );
         };
@@ -65,11 +75,12 @@ let fqdn = config.networking.fqdn; in
       };
       "mas.${fqdn}".locations = favicon // {"/" = rProxy 8081; };
       "${config.mailserver.fqdn}" = {locations = favicon; };
-      "${config.services.keycloak.settings.hostname}".locations = favicon // {
+      "${config.services.keycloak.settings.hostname}".locations = {
+        "= /".return = "301 /realms/main/account";
         "/" = rProxy config.services.keycloak.settings.http-port;
       };
       "wiki.${fqdn}".locations = favicon // {
-        "/".proxyPass = "http://127.0.0.1:${toString config.services.wiki-js.settings.port}";
+        "/" = rProxy config.services.wiki-js.settings.port;
       };
       "${config.services.forgejo.settings.server.DOMAIN}".locations = favicon // {
         "/" = rProxy config.services.forgejo.settings.server.HTTP_PORT;

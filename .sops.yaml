@@ -1,0 +1,7 @@
+creation_rules:
+  - key_groups:
+    - age:
+      # Admin key
+      - age1um5cf83mmfvfa7d42he8p9z59hf7rcdsck6kar7aq7ahj05tx5jqpt8zrk
+      # Server key
+      - age1yh5yut4ken593nzgke9nqpza8r20gqg4anadz03nkvey5shj9e9qf49080

@@ -22,10 +22,8 @@
   };
 
   outputs = { nixpkgs, flake-utils, sops-nix, disko, mailserver, ... }:
-    let args = nixpkgs.lib.mergeAttrsList [
-      (import ./args.nix)
-      {helpers = import ./helpers.nix { pkgs = nixpkgs; }; }
-    ];
+    let 
+      args = import ./args.nix;
     in
     {
       nixosConfigurations.fixthislater = nixpkgs.lib.nixosSystem {
@@ -44,18 +42,23 @@
       let
         pkgs = import nixpkgs { inherit system; };
         fqdn = "${args.hostName}.${args.domain}";
-        helpers = import ./helpers.nix { inherit pkgs; };
+        replaceInBash = src: replacements: pkgs.lib.pipe replacements [
+          (pkgs.replaceVars src)
+          builtins.readFile
+          (pkgs.writers.writeBash (builtins.baseNameOf src))
+          toString
+        ];
       in {
         apps = rec {
           create = {
             meta = { description = "Establish the server after VM creation."; };
             type = "app";
-            program = helpers.replaceInBash ./programs/create.sh { inherit fqdn; };
+            program = replaceInBash ./programs/create.sh { inherit fqdn; };
           };
           update = {
             meta = { description = "Update the server config."; };
             type = "app";
-            program = helpers.replaceInBash ./programs/update.sh { inherit fqdn; };
+            program = replaceInBash ./programs/update.sh { inherit fqdn; };
           };
           default = update;
         };

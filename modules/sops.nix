@@ -21,14 +21,4 @@ in
     "mas/ec-2.pem".owner = masUser;
     "mas/ec-3.pem".owner = masUser;
   };
-  templates = {
-    mas-config = {
-      content = builtins.readFile ../configs/mas.yaml;
-      owner = masUser;
-    };
-    synapse-config = {
-      content = builtins.readFile ../configs/synapse.yaml;
-      owner = synapseUser;
-    };
-  };
 }; }
