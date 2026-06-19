@@ -11,6 +11,17 @@ let
   '';
 in
 { services.nginx = {
+  
+  appendHttpConfig = ''
+    error_log stderr;
+    
+    log_format custom
+      '$remote_addr - $remote_user [$time_local]  $status '
+      '"$host" "$request" $body_bytes_sent "$http_referer" '
+      '"$http_user_agent" "$http_x_forwarded_for"';
+    
+    access_log syslog:server=unix:/dev/log custom;
+  '';
 
   enable = true;
 
@@ -27,7 +38,7 @@ in
       rProxy = port: { proxyPass = "http://127.0.0.1:${toString port}"; };
       defaults = {
         forceSSL = true;
-        enableACME = true;
+        useACMEHost = fqdn;
       };
       favicon = {"~ /favicon*.ico".alias = "/srv/www/${fqdn}/favicon.ico"; };
       matrixClientConfig = {
