@@ -6,6 +6,7 @@ in
 { sops = {
   defaultSopsFile = ../secrets.yaml;
   secrets = {
+    hetzner-api-token.owner = "acme";
     synapse-client-secret.owner = masUser;
     "mas/secret-mas" = {
       key = "mas/secret";

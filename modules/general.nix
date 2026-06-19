@@ -1,4 +1,4 @@
-{ config, modulesPath, hostName, domain, ... }:
+{ modulesPath, hostName, domain, ... }:
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -29,11 +29,6 @@
     "nix-command"
     "flakes" 
   ];
-
-  security.acme = {
-    acceptTerms = true;
-    defaults.email = "admin@${config.networking.fqdn}";
-  };
 
   services.wiki-js = {
     enable = true;
